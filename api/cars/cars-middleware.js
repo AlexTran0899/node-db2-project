@@ -62,4 +62,3 @@ exports.checkVinNumberUnique = (req, res, next) => {
     })
     .catch(next)
 }
-
