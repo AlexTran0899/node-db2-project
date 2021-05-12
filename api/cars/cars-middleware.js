@@ -3,17 +3,10 @@ const yup = require('yup')
 const vinValidator = require('vin-validator')
 
 const messageSchema = yup.object({
-  vin: yup.string()
-    .trim()
-    .required('vin is missing'),
-  make: yup.string()
-    .trim()
-    .required('make is missing'),
-  model: yup.string()
-    .trim()
-    .required('model is missing'),
-  mileage: yup.number()
-    .required('mileage is missing'),
+  vin: yup.string().trim().required(),
+  make: yup.string().trim().required(),
+  model: yup.string().trim().required(),
+  mileage: yup.number().required(),
   title: yup.string(),
   transmission: yup.string(),
 })
@@ -27,7 +20,6 @@ exports.checkCarId = async (req, res, next) => {
       req.car = car
       next()
     }
-
   } catch (err) {
     next(err)
   }
@@ -39,7 +31,7 @@ exports.checkCarPayload = async (req, res, next) => {
     req.body = validate
     next()
   } catch (err) {
-    next({ status: 400, message: err.message })
+    next({ status: 400, message: `${err.path} is missing` })
   }
 }
 
