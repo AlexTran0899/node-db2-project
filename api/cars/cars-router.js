@@ -30,4 +30,4 @@ router.post('/', checkCarPayload, checkVinNumberUnique, checkVinNumberValid, (re
         .catch(next)
 })
 
-module.exports = router;
+module.exports = router
