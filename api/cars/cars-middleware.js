@@ -1,15 +1,56 @@
-const checkCarId = (req, res, next) => {
-  // DO YOUR MAGIC
+const Cars = require('./cars-model')
+const yup = require('yup')
+const vinValidator = require('vin-validator')
+
+const messageSchema = yup.object({
+  vin: yup.string().trim().required(),
+  make: yup.string().trim().required(),
+  model: yup.string().trim().required(),
+  mileage: yup.number().required(),
+  title: yup.string(),
+  transmission: yup.string(),
+})
+
+exports.checkCarId = async (req, res, next) => {
+  try {
+    const car = await Cars.getById(req.params.id)
+    if (!car) {
+      next({ status: 404, message: `car with the id of ${req.params.id} not found` })
+    } else {
+      req.car = car
+      next()
+    }
+  } catch (err) {
+    next(err)
+  }
 }
 
-const checkCarPayload = (req, res, next) => {
-  // DO YOUR MAGIC
+exports.checkCarPayload = async (req, res, next) => {
+  try {
+    const validate = await messageSchema.validate(req.body, { stripUnknown: true })
+    req.body = validate
+    next()
+  } catch (err) {
+    next({ status: 400, message: `${err.path} is missing` })
+  }
 }
 
-const checkVinNumberValid = (req, res, next) => {
-  // DO YOUR MAGIC
+exports.checkVinNumberValid = (req, res, next) => {
+  if (vinValidator.validate(req.body.vin)) {
+    next()
+  } else {
+    next({ status: 400, message: `vin ${req.body.vin} is invalid` })
+  }
 }
 
-const checkVinNumberUnique = (req, res, next) => {
-  // DO YOUR MAGIC
+exports.checkVinNumberUnique = (req, res, next) => {
+  Cars.getByVin(req.body.vin)
+    .then(data => {
+      if (data) {
+        next({ status: 400, message: `vin ${req.body.vin} already exists` })
+      } else {
+        next()
+      }
+    })
+    .catch(next)
 }
